@@ -3,10 +3,9 @@ session_start();
 
 //авторизация
 if (isset($_POST['login'])) {
-  echo '<pre>';
-  var_dump($_POST);
-  echo '</pre>';
-
+  // echo '<pre>';
+  // var_dump($_POST);
+  // echo '</pre>';
   $login = $_POST['login'];
   $pass = $_POST['password'];
 

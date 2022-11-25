@@ -4,10 +4,10 @@ session_start();
 
 echo '<pre>';
 var_dump($_POST);
-var_dump($_GET);
+// var_dump($_GET);
 echo '</pre>';
 
-var_dump(!isset($_GET['filter-products']));
+// var_dump(!isset($_GET['filter-products']));
 
 $sendOrderErr = '';
 
@@ -37,13 +37,100 @@ if (isset($_POST['send_order'])) {
   echo $sendOrderErr;
 }
 
+require_once $_SERVER['DOCUMENT_ROOT'] . ('/src/db_connect.php');
+$pdo = getDbConnect();
+
+ $filter1 = '';
+ $filter2 = '';
+ $filter3 = '';
+ 
 if (isset($_GET['filter-sent'])) {
- echo 'Есть ГЕТ-запрос фильтра товаров: ';
-//  var_dump($_GET);
+ echo 'Есть запрос от фильтра товаров: ';
+ echo '<pre>';
+ var_dump($_GET);
+ echo '</pre>';
+}
+//
+if (isset($_GET['filter-sort-category']) && isset($_GET['filter-sort-order'])) {
+  if ($_GET['filter-sort-category'] !== 'no' && $_GET['filter-sort-order'] !== 'no') {
+    $sortCat = $_GET['filter-sort-category'];
+    $sortOrd = $_GET['filter-sort-order'];
+    $filter1 = ' ORDER BY ' . $sortCat . ' ' . $sortOrd;
+
+    echo '<br>';
+    echo 'сортировка выборки: ' . $filter1;
+  }
+}
+//
+if (isset($_GET['filter-new']) || isset($_GET['filter-sale']) ) {
+  if ($_GET['filter-new'] === 'true' || $_GET['filter-sale'] === 'true') {
+    $sortSubSec1 = $_GET['filter-new'] === 'true' ? 'new' : '';
+    $sortSubSec2 = $_GET['filter-sale'] === 'true' ? 'sale' : '';
+
+    if ($_GET['filter-new'] === 'true' && $_GET['filter-sale'] !== 'true'){
+      $filter2 = ' LEFT JOIN product_subsections ON product_id = product.id INNER JOIN subsection ON subsection.id = subsection_id WHERE subsection.name = ' . $sortSubSec1;
+    } elseif ($_GET['filter-new'] !== 'true' && $_GET['filter-sale'] === 'true') {
+      $filter2 = ' LEFT JOIN product_subsections ON product_id = product.id INNER JOIN subsection ON subsection.id = subsection_id WHERE subsection.name = ' . $sortSubSec2;
+    } else {
+      $filter2 = ' LEFT JOIN product_subsections ON product_id = product.id INNER JOIN subsection ON subsection.id = subsection_id WHERE (subsection.name = ' . $sortSubSec1 . ' OR subsection.name = ' . $sortSubSec2 . ')';
+    }
+
+    echo '<br>';
+    echo 'выборка подкатегории: ' . $filter2;
+  }
+}
+//
+if (isset($_GET['filter-min-price']) || isset($_GET['filter-max-price'])) {
+  $sortPrice1 = $_GET['filter-min-price'];
+  $sortPrice2 = $_GET['filter-max-price'];
+
+  $filter3 = ' AND (product.price >= ' . $sortPrice1 . ' AND product.price <= ' . $sortPrice2 . ')';
+
+  echo '<br>';
+  echo 'ценовая выборка: ' . $filter3;
 }
 
-?>
+//запрос списка товаров
+//
+if (isset($_GET['filter-products']) && $_GET['filter-products'] !== 'all') {
+  $queryStr = "
+    SELECT DISTINCT product.id, product.name, price, photo
+    FROM product
+    LEFT JOIN product_sections ON product_id = product.id
+    INNER JOIN section ON section.id = section_id
+    WHERE section.name = :name" . $filter2 . $filter3 . $filter1;
+  echo '<br>';
+  echo $queryStr;
 
+  $stmt = $pdo -> prepare("
+    SELECT DISTINCT product.id, product.name, price, photo
+    FROM product
+    LEFT JOIN product_sections ON product_id = product.id
+    INNER JOIN section ON section.id = section_id
+    WHERE section.name = :name");
+
+  switch ($_GET['filter-products']) {
+    case 'womens':
+      $secName = 'womens';
+      break;
+    case 'mens':
+      $secName = 'mens';
+      break;
+    case 'childish':
+      $secName = 'childish';
+      break;
+    case 'accessories':
+      $secName = 'accessories';
+      break;
+  }
+
+  $stmt->execute(['name' => $secName]);
+} else {
+  $stmt = $pdo -> query("SELECT DISTINCT * FROM product");
+}
+
+// 
+?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -86,16 +173,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . ('/templates/main_header.php');
           <b class="filter__title">Категории</b>
           <ul class="filter__list">
             <li>
-              <a class="filter__list-item js-form-link 
-<?php 
-if (!isset($_GET['filter-products'])) {
-  echo 'active';
-} elseif ($_GET['filter-products'] === 'all') {
-  echo 'active';
-} else {
-  echo '';
-}
-?>" href="/?filter-products=all">Все</a>
+              <a class="filter__list-item js-form-link <?= !isset($_GET['filter-products']) || $_GET['filter-products'] === 'all' ? 'active' : ''; ?>" href="/?filter-products=all">Все</a>
             </li>
             <li>
               <a class="filter__list-item js-form-link <?= isset($_GET['filter-products']) && $_GET['filter-products'] === 'womens' ? 'active' : ''; ?>" href="/?filter-products=womens">Женщины</a>
@@ -201,73 +279,94 @@ if (isset($_GET['filter-sort-order']) && $_GET['filter-sort-order'] === 'asc') {
         <p class="shop__sorting-res">Найдено <span class="res-sort">858</span> моделей</p>
       </section>
       <section class="shop__list">
+        <!-- <article class="shop__item product" tabindex="0"> -->
+        <!--   <span class="product__id" hidden>1236568434</span> -->
+        <!--   <div class="product__image"> -->
+        <!--     <img src="img/products/product&#45;1.jpg" alt="product&#45;name"> -->
+        <!--   </div> -->
+        <!--   <p class="product__name">Платье со складками</p> -->
+        <!--   <span class="product__price">2 999 руб.</span> -->
+        <!-- </article> -->
+        <!-- <article class="shop__item product" tabindex="0"> -->
+        <!--   <div class="product__image"> -->
+        <!--     <img src="img/products/product&#45;2.jpg" alt="product&#45;name"> -->
+        <!--   </div> -->
+        <!--   <p class="product__name">Платье со складками</p> -->
+        <!--   <span class="product__price">2 999 руб.</span> -->
+        <!-- </article> -->
+        <!-- <article class="shop__item product" tabindex="0"> -->
+        <!--   <span class="product__id" hidden>25</span> -->
+        <!--   <div class="product__image"> -->
+        <!--     <img src="img/products/product&#45;3.jpg" alt="product&#45;name"> -->
+        <!--   </div> -->
+        <!--   <p class="product__name">Платье со складками</p> -->
+        <!--   <span class="product__price">2 999 руб.</span> -->
+        <!-- </article> -->
+        <!-- <article class="shop__item product" tabindex="0"> -->
+        <!--   <div class="product__image"> -->
+        <!--     <img src="img/products/product&#45;4.jpg" alt="product&#45;name"> -->
+        <!--   </div> -->
+        <!--   <p class="product__name">Платье со складками</p> -->
+        <!--   <span class="product__price">2 999 руб.</span> -->
+        <!-- </article> -->
+        <!-- <article class="shop__item product" tabindex="0"> -->
+        <!--   <div class="product__image"> -->
+        <!--     <img src="img/products/product&#45;5.jpg" alt="product&#45;name"> -->
+        <!--   </div> -->
+        <!--   <p class="product__name">Платье со складками</p> -->
+        <!--   <span class="product__price">2 999 руб.</span> -->
+        <!-- </article> -->
+        <!-- <article class="shop__item product" tabindex="0"> -->
+        <!--   <div class="product__image"> -->
+        <!--     <img src="img/products/product&#45;6.jpg" alt="product&#45;name"> -->
+        <!--   </div> -->
+        <!--   <p class="product__name">Платье со складками</p> -->
+        <!--   <span class="product__price">2 999 руб.</span> -->
+        <!-- </article> -->
+        <!-- <article class="shop__item product" tabindex="0"> -->
+        <!--   <div class="product__image"> -->
+        <!--     <img src="img/products/product&#45;7.jpg" alt="product&#45;name"> -->
+        <!--   </div> -->
+        <!--   <p class="product__name">Платье со складками</p> -->
+        <!--   <span class="product__price">2 999 руб.</span> -->
+        <!-- </article> -->
+        <!-- <article class="shop__item product" tabindex="0"> -->
+        <!--   <div class="product__image"> -->
+        <!--     <img src="img/products/product&#45;8.jpg" alt="product&#45;name"> -->
+        <!--   </div> -->
+        <!--   <p class="product__name">Платье со складками</p> -->
+        <!--   <span class="product__price">2 999 руб.</span> -->
+        <!-- </article> -->
+        <!-- <article class="shop__item product" tabindex="0"> -->
+        <!--   <div class="product__image"> -->
+        <!--     <img src="img/products/product&#45;9.jpg" alt="product&#45;name"> -->
+        <!--   </div> -->
+        <!--   <p class="product__name">Платье со складками</p> -->
+        <!--   <span class="product__price">2 999 руб.</span> -->
+        <!-- </article> -->
+<?php
+while ($product = $stmt -> fetch(PDO::FETCH_LAZY)) {
+  // echo '<pre>';
+  // print_r($product);
+  // echo '</pre>';
+?>
         <article class="shop__item product" tabindex="0">
-          <span class="product__id" hidden>1236568434</span>
+        <span class="product__id" hidden><?= $product['id'] ?></span>
           <div class="product__image">
-            <img src="img/products/product-1.jpg" alt="product-name">
+          <img src="img/products/<?= $product['photo'] ?>" alt="<?= $product['name'] ?>">
           </div>
-          <p class="product__name">Платье со складками</p>
-          <span class="product__price">2 999 руб.</span>
+          <p class="product__name"><?= $product['name'] ?></p>
+          <span class="product__price">
+<?php
+  require_once $_SERVER['DOCUMENT_ROOT'] . ('/src/get_fine_price_str.php');
+  echo getFinePrice($product['price']);
+?> руб.</span>
         </article>
-        <article class="shop__item product" tabindex="0">
-          <div class="product__image">
-            <img src="img/products/product-2.jpg" alt="product-name">
-          </div>
-          <p class="product__name">Платье со складками</p>
-          <span class="product__price">2 999 руб.</span>
-        </article>
-        <article class="shop__item product" tabindex="0">
-          <span class="product__id" hidden>25</span>
-          <div class="product__image">
-            <img src="img/products/product-3.jpg" alt="product-name">
-          </div>
-          <p class="product__name">Платье со складками</p>
-          <span class="product__price">2 999 руб.</span>
-        </article>
-        <article class="shop__item product" tabindex="0">
-          <div class="product__image">
-            <img src="img/products/product-4.jpg" alt="product-name">
-          </div>
-          <p class="product__name">Платье со складками</p>
-          <span class="product__price">2 999 руб.</span>
-        </article>
-        <article class="shop__item product" tabindex="0">
-          <div class="product__image">
-            <img src="img/products/product-5.jpg" alt="product-name">
-          </div>
-          <p class="product__name">Платье со складками</p>
-          <span class="product__price">2 999 руб.</span>
-        </article>
-        <article class="shop__item product" tabindex="0">
-          <div class="product__image">
-            <img src="img/products/product-6.jpg" alt="product-name">
-          </div>
-          <p class="product__name">Платье со складками</p>
-          <span class="product__price">2 999 руб.</span>
-        </article>
-        <article class="shop__item product" tabindex="0">
-          <div class="product__image">
-            <img src="img/products/product-7.jpg" alt="product-name">
-          </div>
-          <p class="product__name">Платье со складками</p>
-          <span class="product__price">2 999 руб.</span>
-        </article>
-        <article class="shop__item product" tabindex="0">
-          <div class="product__image">
-            <img src="img/products/product-8.jpg" alt="product-name">
-          </div>
-          <p class="product__name">Платье со складками</p>
-          <span class="product__price">2 999 руб.</span>
-        </article>
-        <article class="shop__item product" tabindex="0">
-          <div class="product__image">
-            <img src="img/products/product-9.jpg" alt="product-name">
-          </div>
-          <p class="product__name">Платье со складками</p>
-          <span class="product__price">2 999 руб.</span>
-        </article>
-      </section>
-      <ul class="shop__paginator paginator">
+<?php
+}
+?>
+    </section>
+      <ul class="shop__paginator paginator" style="width: fit-content; margin: 0 auto">
         <li>
           <a class="paginator__item">1</a>
         </li>

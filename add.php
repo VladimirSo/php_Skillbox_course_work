@@ -40,7 +40,8 @@ $prodFoto = isset($_FILES['product-foto']) ? $_FILES['product-foto']['full_path'
 
 if (isset($_POST['product-name']) && isset($_POST['product-price'])) {
   if (isset($_FILES['product-foto'])) {
-    // echo "<script>alert('Товар добавлен')</script>"; 
+   // echo "<script>alert('Товар добавлен')</script>";
+    // товар первоначально добавляемый в БД еще не миеет id, поэтому
     // если с POST-запросом был получен id товара, то это обновление
     // данных, иначе - добавление нового товара
     if (isset($_POST['product-id'])) {

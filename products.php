@@ -7,9 +7,9 @@ $pdo = getDbConnect();
 
 require_once $_SERVER['DOCUMENT_ROOT'] . ('/src/get_user_role.php');
 $authUserGroups = getUserGroups($pdo, $_COOKIE['auth_person']);
-echo '<pre>';
-var_dump($authUserGroups);
-echo '</pre>';
+// echo '<pre>';
+// var_dump($authUserGroups);
+// echo '</pre>';
 
 //если пользователь не админ отправляем его на список заказов
 if (array_search('admin', $authUserGroups) === false) {
@@ -69,30 +69,25 @@ require_once $_SERVER['DOCUMENT_ROOT'] . ('/templates/admin_header.php');
     <span class="page-products__header-field">Sale</span>
   </div>
   <ul class="page-products__list">
-    <li class="product-item page-products__item" style="display: grid; grid-template-columns: 205px 145px 145px 145px 100px 100px 1fr 1fr;">
-      <b class="product-item__name">Туфли черные</b>
-      <span class="product-item__field">235454345</span>
-      <span class="product-item__field">2 500 руб.</span>
-      <span class="product-item__field">
-        <span>Женщины</span>
-        <span>Женщины</span>
-        <span>Женщины</span>
-        <span>Женщины</span>
-      </span>
-      <span class="product-item__field">Да</span>
-      <span class="product-item__field">Да</span>
-      </span>
-      <a href="add.php?edit&id=111" class="product-item__edit" aria-label="Редактировать"></a>
-      <button class="product-item__delete"></button>
-    </li>
+    <!-- <li class="product&#45;item page&#45;products__item" style="display: grid; grid&#45;template&#45;columns: 205px 145px 145px 145px 100px 100px 1fr 1fr;"> -->
+    <!--   <b class="product&#45;item__name">Туфли черные</b> -->
+    <!--   <span class="product&#45;item__field">235454345</span> -->
+    <!--   <span class="product&#45;item__field">2 500 руб.</span> -->
+    <!--   <span class="product&#45;item__field"> -->
+    <!--     <span>Женщины</span> -->
+    <!--   </span> -->
+    <!--   <span class="product&#45;item__field">Да</span> -->
+    <!--   <span class="product&#45;item__field">Да</span> -->
+    <!--   </span> -->
+    <!--   <a href="add.php?edit&#38;id=111" class="product&#45;item__edit" aria&#45;label="Редактировать"></a> -->
+    <!--   <button class="product&#45;item__delete"></button> -->
+    <!-- </li> -->
 
 <?php
   while ($product = $stmt -> fetch(PDO::FETCH_LAZY)) {
-
-    var_dump($product);
-    echo '<br>';
-    echo $product['id'];
-     
+    // echo '<pre>';
+    // print_r($product);
+    // echo '</pre>';
 ?>
     <li class="product-item page-products__item" style="display: grid; grid-template-columns: 205px 145px 145px 145px 100px 100px 1fr 1fr;">
     <b class="product-item__name"><?= $product['name'] ?></b>
@@ -157,7 +152,6 @@ require_once $_SERVER['DOCUMENT_ROOT'] . ('/templates/admin_header.php');
 ?>    
     <span class="product-item__field">
 <?php
-    // if ($prodSubsec['name'] === 'new') {
      if (array_search('new', $prodSubsecArr, $strict = false) !== false) { 
        echo 'Да';
      } else {
@@ -167,17 +161,12 @@ require_once $_SERVER['DOCUMENT_ROOT'] . ('/templates/admin_header.php');
     
     <span class="product-item__field">
 <?php
-     // if ($prodSubsec['name'] === 'sale') {
      if (array_search('sale', $prodSubsecArr, $strict = false) !== false) { 
        echo 'Да';
      } else {
        echo 'Нет';
      }
 ?></span>
-
-<?php
-    // }
-?>
       <!-- <span class="product&#45;item__field">Да</span> -->
       <a href="/add.php?edit&id=<?= $product['id'] ?>" class="product-item__edit" aria-label="Редактировать"></a>
       <!-- <button class="product&#45;item__delete"></button> -->

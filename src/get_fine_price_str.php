@@ -16,7 +16,7 @@ function getFinePrice ($value, $offset = 3) {
 
       $result[] = $str[$l-1 - $i];
     }
-    return trim(implode(null, $result));
+    return trim(implode((string)null, $result));
   } else {
     return $str;
   }
