@@ -68,7 +68,7 @@ if (isset($_POST['product-name']) && isset($_POST['product-price'])) {
     $stmt->execute($exArr);
     $stmt->fetch(PDO::FETCH_LAZY);
     //загружаем картинку для товара
-    $uploadPath = $_SERVER['DOCUMENT_ROOT'] . '/upload/';
+    $uploadPath = $_SERVER['DOCUMENT_ROOT'] . '/img/products/';
     move_uploaded_file($_FILES['product-foto']['tmp_name'], $uploadPath . $_FILES['product-foto']['name']);
     //если есть необязательные параметры для товара заносим в БД их
     //если это обновление данных для товара, то сначала удаляем старые 

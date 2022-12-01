@@ -51,7 +51,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . ('/templates/main_header.php');
         </p>
       </li>
       <li>
-        <b class="page-delivery__item-title">В день покупки - 560 РУБ</b>
+      <b class="page-delivery__item-title">В день покупки - <?= $shippCost * 2 ?> РУБ</b>
         <p class="page-delivery__item-desc">
           Доступна для жителей г. Москва в пределах МКАД. Заказы, оформленныес понедельника по пятницу до 14:00 будут доставлены в тот же день с 19:00до 23:00. Изменение адреса доставки после оформления заказа невозможно.
         </p>
