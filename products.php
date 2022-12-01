@@ -39,7 +39,7 @@ if (array_search('admin', $authUserGroups) === false) {
     //удаляем картинку
     $imgsDir = $_SERVER['DOCUMENT_ROOT'] . '/img/products/';
     unlink($imgsDir . $imgForDel['photo']);
-    // header('Refresh: 0.5; URL=/products.php');
+    header('Refresh: 0.5; URL=/products.php');
   }
   //запрос списка товаров
   $stmt = $pdo -> query("SELECT * FROM product");
