@@ -7,9 +7,10 @@ $pdo = getDbConnect();
 
 require_once $_SERVER['DOCUMENT_ROOT'] . ('/src/get_user_role.php');
 $authUserGroups = getUserGroups($pdo, $_COOKIE['auth_person']);
-echo '<pre>';
-var_dump($authUserGroups);
-echo '</pre>';
+// echo '<pre>';
+// var_dump($authUserGroups);
+// echo '</pre>';
+
 //если пользователь не админ отправляем его на список заказов
 if (array_search('admin', $authUserGroups) === false) {
   echo "<script>alert('Только для администраторов!')</script>"; 
@@ -17,19 +18,16 @@ if (array_search('admin', $authUserGroups) === false) {
   header('Refresh: 0.5; URL=/orders.php');
 }
 
-var_dump($_SERVER['PHP_SELF']);
-
-if (! empty($_POST)) {
-  echo '<pre>';
-  var_dump($_POST);
-  echo '</pre>';
-}
-
-if (! empty($_FILES)) {
-  echo '<pre>';
-  var_dump($_FILES);
-  echo '</pre>';
-}
+// if (! empty($_POST)) {
+//   echo '<pre>';
+//   var_dump($_POST);
+//   echo '</pre>';
+// }
+// if (! empty($_FILES)) {
+//   echo '<pre>';
+//   var_dump($_FILES);
+//   echo '</pre>';
+// }
 
 $prodName = isset($_POST['product-name']) ? $_POST['product-name'] : '';
 $prodPrice = isset($_POST['product-price']) ? $_POST['product-price'] : '';
@@ -41,7 +39,7 @@ $prodFoto = isset($_FILES['product-foto']) ? $_FILES['product-foto']['full_path'
 if (isset($_POST['product-name']) && isset($_POST['product-price'])) {
   if (isset($_FILES['product-foto'])) {
    // echo "<script>alert('Товар добавлен')</script>";
-    // товар первоначально добавляемый в БД еще не миеет id, поэтому
+    // товар первоначально добавляемый в БД еще не имеет id, поэтому
     // если с POST-запросом был получен id товара, то это обновление
     // данных, иначе - добавление нового товара
     if (isset($_POST['product-id'])) {
@@ -57,14 +55,13 @@ if (isset($_POST['product-name']) && isset($_POST['product-price'])) {
 
     require_once $_SERVER['DOCUMENT_ROOT'] . ('/src/get_num_from_str.php');
     $price = getNumFromStr($prodPrice);
-    //добавляем в БД обязательные данные товара
+    //добавляем или обновляем в БД обязательные данные товара
     $exArr = ['name' => $prodName, 'price' => $price, 'photo' => $prodFoto];
 
     if (isset($_POST['product-id'])) {
      $exArr = array_merge($exArr, array('id' => $_POST['product-id']));
-     var_dump(array_merge($exArr, array('id' => $_POST['product-id'])));
     }
-    var_dump($exArr);
+    // var_dump($exArr);
     $stmt->execute($exArr);
     $stmt->fetch(PDO::FETCH_LAZY);
     //загружаем картинку для товара
@@ -153,9 +150,10 @@ if (isset($_POST['product-name']) && isset($_POST['product-price'])) {
   echo "<script>alert('Заполните поля \"Данные о товаре\" и \"Фотография товара\"!')</script>";
 }
 
+/* если есть GET-запрос на редкатирование товара то выбираем из БД 
+ данные для этого товара */
 if (isset($_GET['edit'])) {
-  echo 'Запрос на редактирование товара ' . $_GET['id'];
-
+  // echo 'Запрос на редактирование товара ' . $_GET['id'];
   $stmt = $pdo -> prepare("
     SELECT id, name, price, photo 
     FROM product 
@@ -163,7 +161,7 @@ if (isset($_GET['edit'])) {
 
   $stmt->execute(['id' => $_GET['id']]); 
   $edProd = $stmt->fetch(PDO::FETCH_LAZY);
-  var_dump($edProd);
+  // var_dump($edProd);
 
   $stmt2 = $pdo -> prepare("
     SELECT product.id, product_id, section_id, section.name
@@ -174,10 +172,10 @@ if (isset($_GET['edit'])) {
   $stmt2->execute(['id' => $_GET['id']]);
   $edProdSecArr = []; 
   while ($prodSec = $stmt2 -> fetch(PDO::FETCH_LAZY)) {
-    var_dump($prodSec['name']);
+    // var_dump($prodSec['name']);
     array_push($edProdSecArr, $prodSec['name']);
   }
-  var_dump($edProdSecArr);
+  // var_dump($edProdSecArr);
 
   $stmt3 = $pdo -> prepare("
     SELECT product.id, product_id, subsection_id, subsection.name
@@ -188,10 +186,10 @@ if (isset($_GET['edit'])) {
   $stmt3->execute(['id' => $_GET['id']]);
   $edProdSubsecArr = []; 
   while ($prodSubsec = $stmt3 -> fetch(PDO::FETCH_LAZY)) {
-    var_dump($prodSubsec['name']);
+    // var_dump($prodSubsec['name']);
     array_push($edProdSubsecArr, $prodSubsec['name']);
   }
-  var_dump($edProdSubsecArr);
+  // var_dump($edProdSubsecArr);
 }
 ?>
 <!DOCTYPE html>

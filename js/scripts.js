@@ -104,7 +104,8 @@ if (filterWrapper) {
 }
 
 const shopList = document.querySelector('.shop__list');
-//*
+
+//* ф-я асинхронной отправки данных, используется в коде ниже
 async function sendData(data, url) {
   return await fetch(url, {
     method: 'POST',
@@ -176,8 +177,6 @@ if (shopList) {
           setTimeout(() => popupEnd.classList.remove('fade'), 1000);
 
           //*
-          // formOrder.submit();
-
           async function handleFormSubmit(event) {
             event.preventDefault();
             // console.log(event.target.parentNode);
@@ -228,7 +227,6 @@ const pageOrderList = document.querySelector('.page-order__list');
 if (pageOrderList) {
 
   pageOrderList.addEventListener('click', evt => {
-
 
     if (evt.target.classList && evt.target.classList.contains('order-item__toggle')) {
       var path = evt.path || (evt.composedPath && evt.composedPath());
@@ -313,10 +311,11 @@ if (addList) {
 
   });
   
-  const addProductForm = document.querySelector('.js-add-product');
   const button = document.querySelector('.button');
   const popupEnd = document.querySelector('.page-add__popup-end');
  //* 
+  const addProductForm = document.querySelector('.js-add-product');
+
   addProductForm.addEventListener('submit', (ev) => {
     ev.preventDefault();
 
@@ -358,11 +357,19 @@ if (productsList) {
 
 // jquery range maxmin
 if (document.querySelector('.shop-page')) {
-
+  //*
+  let minPriceStr = document.querySelector('.min-price').textContent.replace(/\s/g, '');
+  let maxPriceStr = document.querySelector('.max-price').textContent.replace(/\s/g, '');
+  let minPrice = parseInt(+/\d+/.exec(minPriceStr));
+  let maxPrice = parseInt(+/\d+/.exec(maxPriceStr));
+  // console.log(minPrice);
+  // console.log(maxPrice);
+  //*
   $('.range__line').slider({
     min: 350,
     max: 32000,
-    values: [350, 32000],
+    // values: [350, 32000],
+    values: [minPrice, maxPrice],
     range: true,
     stop: function(event, ui) {
 
@@ -386,7 +393,6 @@ const filterFormEl = document.querySelector('.js-filter-form');
 //ф-я обрезает из строки с ценой часть с обозначением валюты, удаляет из неё пробелы и возвращает результат в виде числа
 const cutString = (str, pattern) => {
   let result = '';
-  // const pattern = 'руб';
 
   if (str.includes(pattern)) {
     const index = str.indexOf(pattern);

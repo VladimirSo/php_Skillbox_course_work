@@ -20,14 +20,26 @@ if (array_search('admin', $authUserGroups) === false) {
   //обработка запроса на удаление товара
   if (isset($_GET['del'])) {
     // echo 'Запрос на удаление товара ' . $_GET['id'];
+    //получаем имя картинки удаляемого товара
+    $stmt = $pdo -> prepare("
+      SELECT photo 
+      FROM product
+      WHERE id = :id");
+    
+    $stmt -> execute(['id' => $_GET['id']]); 
+    $imgForDel = $stmt->fetch(PDO::FETCH_LAZY);
+    var_dump($imgForDel);
+    //удаляем данные из БД
     $stmt = $pdo -> prepare("
       DELETE FROM product
       WHERE id = :id");
 
     $stmt -> execute(['id' => $_GET['id']]); 
     $stmt->fetch(PDO::FETCH_LAZY);
-
-    header('Refresh: 0.5; URL=/products.php');
+    //удаляем картинку
+    $imgsDir = $_SERVER['DOCUMENT_ROOT'] . '/img/products/';
+    unlink($imgsDir . $imgForDel['photo']);
+    // header('Refresh: 0.5; URL=/products.php');
   }
   //запрос списка товаров
   $stmt = $pdo -> query("SELECT * FROM product");

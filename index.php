@@ -5,12 +5,9 @@ session_start();
 require_once ($_SERVER['DOCUMENT_ROOT'] . '/data/shop_list_templ.php');
 $prodsForPage = PRODS_FOR_PAGE;
 
-echo '<pre>';
-var_dump($_POST);
-// var_dump($_GET);
-echo '</pre>';
-
-// var_dump(!isset($_GET['filter-products']));
+// echo '<pre>';
+// var_dump($_POST);
+// echo '</pre>';
 
 $sendOrderErr = '';
 
@@ -36,22 +33,21 @@ if (isset($_POST['send_order'])) {
     }
    }
   }
-
-  echo $sendOrderErr;
+  // echo $sendOrderErr;
   echo "<script>alert('" . $sendOrderErr . "')</script>"; 
 }
 
 require_once $_SERVER['DOCUMENT_ROOT'] . ('/src/db_connect.php');
 $pdo = getDbConnect();
-
  
-if (isset($_GET['filter-sent'])) {
- echo 'Есть запрос от фильтра товаров: ';
- echo '<pre>';
- var_dump($_GET);
- echo '</pre>';
-}
-//
+// if (isset($_GET['filter-sent'])) {
+//  echo 'Есть запрос от фильтра товаров: ';
+//  echo '<pre>';
+//  var_dump($_GET);
+//  echo '</pre>';
+// }
+
+//заготовка для фильтра сортировки
 $filter1 = '';
 
 if (isset($_GET['filter-sort-category']) && isset($_GET['filter-sort-order'])) {
@@ -69,7 +65,8 @@ if (isset($_GET['filter-sort-category']) && isset($_GET['filter-sort-order'])) {
     // echo 'сортировка выборки: ' . $filter1;
   }
 }
-//
+
+//заготовка для фильтра выборки по подгруппе товара 
 $filter2_1 = '';
 $filter2_2 = '';
 
@@ -77,7 +74,8 @@ if (isset($_GET['filter-new']) || isset($_GET['filter-sale']) ) {
   $sortSubSec1 = isset($_GET['filter-new']) && $_GET['filter-new'] === 'true' ? 'new' : '';
   $sortSubSec2 = isset($_GET['filter-sale']) && $_GET['filter-sale'] === 'true' ? 'sale' : '';
 
-  if ($_GET['filter-new'] === 'true' || $_GET['filter-sale'] === 'true') {
+  // if ($_GET['filter-new'] === 'true' || $_GET['filter-sale'] === 'true') {
+  if ($sortSubSec1 === 'new' || $sortSubSec2 === 'sale') {
     $filter2_1 = " LEFT JOIN product_subsections ON product_subsections.product_id = product.id INNER JOIN subsection ON subsection.id = subsection_id";
   }
 
@@ -96,7 +94,7 @@ if (isset($_GET['filter-new']) || isset($_GET['filter-sale']) ) {
   // echo '<br>';
   // echo $filter2_2;
 }
-//
+//заготовка для фильтра по цене
 $filter3 = '';
 
 if (isset($_GET['filter-min-price']) || isset($_GET['filter-max-price'])) {
@@ -108,14 +106,13 @@ if (isset($_GET['filter-min-price']) || isset($_GET['filter-max-price'])) {
   // echo '<br>';
   // echo 'ценовая выборка: ' . $filter3;
 }
-//
+//заготовка для постраничной выбоки
 $filter4 = '';
 
 if (isset($_GET['page'])) {
- echo 'страница: ' . $_GET['page'];
+//  echo 'страница: ' . $_GET['page'];
   $page = (int)$_GET['page'];
   $from = ($page-1) * $prodsForPage;
-  // $to = $prodsForPage;
 
   $filter4 = ' LIMIT ' . $from . ', ' . $prodsForPage;
 } else {
@@ -123,7 +120,7 @@ if (isset($_GET['page'])) {
 }
 
 //запрос списка товаров
-//
+//если есть запрос на выборку группы товаров идем по первой ветке
 if (isset($_GET['filter-products']) && $_GET['filter-products'] !== 'all') {
 
   $stmt = $pdo -> prepare("
@@ -147,7 +144,7 @@ if (isset($_GET['filter-products']) && $_GET['filter-products'] !== 'all') {
       $secName = 'accessories';
       break;
   }
-var_dump($stmt);
+// var_dump($stmt);
   $stmt->execute(['name' => $secName]);
 
   $stmtSum = $pdo -> prepare("
@@ -174,7 +171,6 @@ var_dump($stmt);
     $prodCount = $stmtSum -> fetch(PDO::FETCH_LAZY);
   }
 }
-
 // 
 ?>
 <!DOCTYPE html>
@@ -447,7 +443,7 @@ for ($i = 0; $i < $pageCount; $i++) {
     $queryStr = parse_url($url, PHP_URL_QUERY);
    // var_dump($queryStr);
     /* если в get-запросе уже был парметр соотвествующий запросу 
-      страницы, то меняем его, иначе добавляем параметр
+      страницы, то меняем его, иначе добавляем соответствующий параметр
       */
     if (strpos($queryStr, 'page=') !== false) {
       $queryArr = explode('&', $queryStr);
@@ -468,11 +464,7 @@ for ($i = 0; $i < $pageCount; $i++) {
   }
 ?>
   <li>
-    <a class="paginator__item" href="/
-<?php 
-  //
-  echo $newGet;
-?>"><?= $i+1 ?></a>
+    <a class="paginator__item" href="/<?= $newGet; ?>"><?= $i+1 ?></a>
   </li>
 <?php
 }
